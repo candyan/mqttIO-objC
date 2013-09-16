@@ -182,8 +182,8 @@
     [self error:MQTTSessionEventConnectionClosed];
 }
 
-- (void)setDelegate:(id)aDelegate {
-    delegate = aDelegate;
+- (void)setDelegate:(id<MQTTSessionDelegate>)aDelegate {
+  delegate = aDelegate;
 }
 
 - (void)connectToHost:(NSString*)ip port:(UInt32)port {

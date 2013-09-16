@@ -32,43 +32,51 @@ typedef enum {
     MQTTSessionEventProtocolError
 } MQTTSessionEvent;
 
+@protocol MQTTSessionDelegate;
+
 @interface MQTTSession : NSObject {
-    MQTTSessionStatus    status;
-    NSString*            clientId;
+    MQTTSessionStatus        status;
+    NSString*                clientId;
     //NSString*            userName;
     //NSString*            password;
-    UInt16               keepAliveInterval;
-    BOOL                 cleanSessionFlag;
-    MQTTMessage*         connectMessage;
-    NSRunLoop*           runLoop;
-    NSString*            runLoopMode;
-    NSTimer*             timer;
-    NSInteger            idleTimer;
-    MQTTEncoder*         encoder;
-    MQTTDecoder*         decoder;
-    UInt16               txMsgId;
-    id                   delegate;
-    NSMutableDictionary* txFlows;
-    NSMutableDictionary* rxFlows;
-    unsigned int         ticks;
+    UInt16                   keepAliveInterval;
+    BOOL                     cleanSessionFlag;
+    MQTTMessage*             connectMessage;
+    NSRunLoop*               runLoop;
+    NSString*                runLoopMode;
+    NSTimer*                 timer;
+    NSInteger                idleTimer;
+    MQTTEncoder*             encoder;
+    MQTTDecoder*             decoder;
+    UInt16                   txMsgId;
+    id<MQTTSessionDelegate>  delegate;
+    NSMutableDictionary*     txFlows;
+    NSMutableDictionary*     rxFlows;
+    unsigned int             ticks;
 }
 
 - (id)initWithClientId:(NSString*)theClientId;
-- (id)initWithClientId:(NSString*)theClientId runLoop:(NSRunLoop*)theRunLoop
+
+- (id)initWithClientId:(NSString*)theClientId
+               runLoop:(NSRunLoop*)theRunLoop
                forMode:(NSString*)theRunLoopMode;
+
 - (id)initWithClientId:(NSString*)theClientId
               userName:(NSString*)theUsername
               password:(NSString*)thePassword;
+
 - (id)initWithClientId:(NSString*)theClientId
               userName:(NSString*)theUserName
               password:(NSString*)thePassword
                runLoop:(NSRunLoop*)theRunLoop
                forMode:(NSString*)theRunLoopMode;
+
 - (id)initWithClientId:(NSString*)theClientId
               userName:(NSString*)theUsername
               password:(NSString*)thePassword
              keepAlive:(UInt16)theKeepAliveInterval
           cleanSession:(BOOL)cleanSessionFlag;
+
 - (id)initWithClientId:(NSString*)theClientId
               userName:(NSString*)theUsername
               password:(NSString*)thePassword
@@ -76,6 +84,7 @@ typedef enum {
           cleanSession:(BOOL)theCleanSessionFlag
                runLoop:(NSRunLoop*)theRunLoop
                forMode:(NSString*)theMode;
+
 - (id)initWithClientId:(NSString*)theClientId
               userName:(NSString*)theUserName
               password:(NSString*)thePassword
@@ -85,6 +94,7 @@ typedef enum {
                willMsg:(NSData*)willMsg
                willQoS:(UInt8)willQoS
         willRetainFlag:(BOOL)willRetainFlag;
+
 - (id)initWithClientId:(NSString*)theClientId
               userName:(NSString*)theUserName
               password:(NSString*)thePassword
@@ -96,6 +106,7 @@ typedef enum {
         willRetainFlag:(BOOL)willRetainFlag
                runLoop:(NSRunLoop*)theRunLoop
                forMode:(NSString*)theRunLoopMode;
+
 - (id)initWithClientId:(NSString*)theClientId
              keepAlive:(UInt16)theKeepAliveInterval
         connectMessage:(MQTTMessage*)theConnectMessage
@@ -104,12 +115,15 @@ typedef enum {
 
 - (void)dealloc;
 - (void)close;
-- (void)setDelegate:aDelegate;
+- (void)setDelegate:(id<MQTTSessionDelegate>)aDelegate;
+
 - (void)connectToHost:(NSString*)ip port:(UInt32)port;
 - (void)connectToHost:(NSString*)ip port:(UInt32)port usingSSL:(BOOL)usingSSL;
+
 - (void)subscribeTopic:(NSString*)theTopic;
 - (void)subscribeToTopic:(NSString*)topic atLevel:(UInt8)qosLevel;
 - (void)unsubscribeTopic:(NSString*)theTopic;
+
 - (void)publishData:(NSData*)theData onTopic:(NSString*)theTopic;
 - (void)publishDataAtLeastOnce:(NSData*)theData onTopic:(NSString*)theTopic;
 - (void)publishDataAtLeastOnce:(NSData*)theData onTopic:(NSString*)theTopic retain:(BOOL)retainFlag;
@@ -118,10 +132,12 @@ typedef enum {
 - (void)publishDataExactlyOnce:(NSData*)theData onTopic:(NSString*)theTopic;
 - (void)publishDataExactlyOnce:(NSData*)theData onTopic:(NSString*)theTopic retain:(BOOL)retainFlag;
 - (void)publishJson:(id)payload onTopic:(NSString*)theTopic;
-- (void)timerHandler:(NSTimer*)theTimer;
+
 - (void)encoder:(MQTTEncoder*)sender handleEvent:(MQTTEncoderEvent) eventCode;
 - (void)decoder:(MQTTDecoder*)sender handleEvent:(MQTTDecoderEvent) eventCode;
 - (void)decoder:(MQTTDecoder*)sender newMessage:(MQTTMessage*) msg;
+
+- (void)timerHandler:(NSTimer*)theTimer;
 
 // private methods
 - (void)newMessage:(MQTTMessage*)msg;
@@ -139,7 +155,9 @@ typedef enum {
 
 @end
 
-@interface NSObject (MQTTSessionDelegate)
+@protocol MQTTSessionDelegate <NSObject>
+
+@optional
 - (void)session:(MQTTSession*)session handleEvent:(MQTTSessionEvent)eventCode;
 - (void)session:(MQTTSession*)session newMessage:(NSData*)data onTopic:(NSString*)topic;
 
